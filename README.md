@@ -127,5 +127,9 @@ npm run build
 npm run start
 ```
 
+## Contributing
+
+You can view the issue list and do a Pull Request.
+
 ## Author & License
 Created by __Carlos Pérez__ Gutiérrez under the __MIT license__.
