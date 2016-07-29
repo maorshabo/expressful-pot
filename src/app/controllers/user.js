@@ -92,7 +92,7 @@ function destroy(req, res, next) {
 
 // Helpers
 function saveUser(user, res){ 
-  return res.json({token: jwt.signToken(user.id, user.role)});
+  return res.json({token: jwt.signToken(user.id, user.role), message: 'Your profile has been successfully updated'});
 }
 
 function isAdmin(req){
