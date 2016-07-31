@@ -1,6 +1,6 @@
 {
   "name": "expressful-pot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A simple API boilerplate build with express+mongoDB+JWT written in ES6.",
   "scripts": {
     "babel-node": "babel-node --presets es2015,stage-3",
