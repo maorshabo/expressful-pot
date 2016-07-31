@@ -7,8 +7,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import logger from "../app/utils/logger";
-import routes from "../app/routes";
-import errorHandlingMiddleware from "../app/routes/middlewares/errorHandling";
+import routes from "../app/http/routes";
 
 import config from "../config";
 
@@ -24,7 +23,15 @@ app.use(morgan("combined", { "stream": logger.stream }));
 
 app.use('/', routes);
 
-app.use(errorHandlingMiddleware);
+app.use(errorHandler);
+
+function errorHandler(err, req, res, next) {
+  if(err) {
+    return res.status(err.status).json({message: err.message});
+  }else{
+    next();
+  }
+}
 
 function listen(){
   app.listen(config.app.port, () =>{

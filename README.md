@@ -14,28 +14,26 @@ A simple API boilerplate build with express+mongoDB+JWT written in ES6.
 ├── package.json
 └── src
     ├── app
-    │   ├── controllers
-    │   │   ├── auth.js
-    │   │   └── user.js
-    │   ├── middlewares
-    │   │   ├── auth.js
-    │   │   └── errorHandling.js
+    │   ├── http
+    │   │   ├── controllers
+    │   │   │   ├── authController.js
+    │   │   │   └── userController.js
+    │   │   ├── middlewares
+    │   │   │   └── auth.js
+    │   │   ├── api_routes.js
+    │   │   ├── auth_routes.js
+    │   │   └── index.js
     │   ├── models
-    │   │   └── user.js
-    │   ├── routes
-    │   │   ├── api 
-    │   │   │   └── v1
-    │   │   │       └── index.js
-    │   │   └── auth
-    │   │       └── index.js
-    │   ├── utils
-    │   │   ├── jwt.js
-    │   │   ├── logger.js
-    │   │   ├── mongoose.js
-    │   │   └── HttpError.js
-    │   └── app.js
-    ├── config
+    │   │   └── user.js        
+    │   └── utils
+    │       ├── HttpError.js
+    │       ├── jwt.js
+    │       └── logger.js    
+    ├── bootstrap
+    │   ├── app.js
     │   ├── express.js
+    │   └── mongoose.js
+    ├── config
     │   └── index.js
     ├── seeds
     │   └── users.js
@@ -43,24 +41,19 @@ A simple API boilerplate build with express+mongoDB+JWT written in ES6.
         └── logs
 ```
 
-`src/app/app.js`  
-This file contains the mongodb connection and the routes of the app. You can add new routes and follow the convention that is presented next.
+**src/app/http**  
+This folder contains controllers, middlewares, and routes. Almost all of the logic to handle requests will be placed in this directory. The boilerplate includes:
 
-`src/app/routes`  
-This folder follow a simple convention of naming folders, e.g. `http://localhost:3000/api/v1` endpoint resides in the folder `src/app/routes/api/v1/index`.  
-Every router endpoint have to its own controller.method
+- **/controllers**
+    - `authController.js` basic controller for **auth** routes.
+    - `userController.js` basic controller for **user** routes.
+- **/middlewares**
+    - `auth.js` middleware for JWT token verification. `token`, _user_ `id` , and _user_ `role` are saved in **Express** `response.locals` if auth is ok. Every request that involves this middleware will verify the JWT, if the token is still valid and its expiration time is below **6 hours** (default configuration), then it will send a fresh valid token with expiration date to **24 hours** (default configuration). This new `token` will be appended in the request.
+- `/api_routes.js` contains all the API routes.
+- `/auth_routes.js` contains all the authorization routes.
+- `/index.js` contains all the Application routes.
 
-`src/app/controllers`  
-This folder contains all the controllers that a route endpoint needs, e.g. router methods in `src/app/auth/index.js` uses `src/app/controllers/auth.js` controller methods.
-
-`src/app/middlewares`  
-This folder contains all the middlewares. The boilerplate includes:
-
-- `auth.js` middleware for JWT token verification. `token`, _user_ `id` , and _user_ `role` are saved in **Express** `response.locals` if auth is ok. Every request that involves this middleware will verify the JWT, if the token is still valid and its expiration time is below **6 hours** (default configuration), then it will send a fresh valid token with expiration date to **24 hours** (default configuration). This new `token` will be appended in the request.  
-__IMPORTANT__: Send token in every request as `x-access-token` header or as `token` in _body|query_ request.
-- `errorHandling.js` middleware for every `return next({Error})` in the app.
-
-`src/app/models`  
+**src/app/models**  
 This folder contains all the models of the application. The boilerplate includes the `user.js` model with basic fields for **authentification** and **password reset** : 
 
 - `email`
@@ -69,24 +62,27 @@ This folder contains all the models of the application. The boilerplate includes
 - `passwordResetToken`
 - `passwordResetExpires`
 
-`src/app/utils`  
+**src/app/utils**  
 This folder contains all the utils for the application. The boilerplate includes:
 
+- `HttpError.js` is used to raise errors along with **Express** `next()` method, e.g. `return next(new HttpError())`.
 - `jwt.js` is the responsable for JWT **signature** and **verification**.
 - `logger.js` is the responsable for the logger object
+
+**src/bootstrap**  
+This folder contains files that bootstrap expressful pot. The boilerplate includes:
+- `app.js` is our application bootstrap. Connects mongodb and start listening express.
+- `express.js` is where general express configuration resides. e.g. Application-level middleware like _body-parser_ or _morgan_.
 - `mongoose.js` is the responsable for connecting/closing with MongoDB
-- `HttpError.js` is used to raise errors along with **Express** `next()` method, e.g. `return next(new HttpError())`.
 
-`src/config`
+**src/config**  
 This folder contains all the configuration of the application. The boilerplate includes:
-
 - `index.js` is where __development__ and __production__ configurations resides, e.g. `jwt.secret` or `app.host`.
-- `express.js` is where general express configuration resides. e.g. Application-level middleware like `body-parser` or `morgan`.
  
-`src/seeds`  
+**src/seeds**  
 This folder contains all the seeds for development. The boilerplate includes `users.js`, please consider that every user needs to hash his password, using the `users.js` approach is not optimal for a huge seed, please consider `insertMany` or `collection.insert`, but be aware that none of them trigger middlewares.
 
-`src/storage`
+**src/storage**  
 Use this folder for anything that needs to be stored. This Boilerplate includes:
 - `logs` where all the logs are saved
 
