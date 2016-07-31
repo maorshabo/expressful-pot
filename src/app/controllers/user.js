@@ -2,99 +2,106 @@ import HttpError from '../utils/HttpError';
 import User from '../models/user';
 import jwt from '../utils/jwt';
 
-function index(req, res, next) {
-  if(!isAdmin(req)){
-    return next(new HttpError(401));
-  }
+async function index(req, res, next) {
+  if(!isAdmin(req)) return next(new HttpError(401));
 
-  User.find({}).then(users => {
+  try{
+    const users = await User.find({});
     const {token} = getRefreshedToken(req);
+
     return res.json({users, token});
-  });
-}
-
-function show(req, res, next) {
-  User.findById(req.params.id).then(user => {
-    const {token} = getRefreshedToken(req);
-
-    if (!user) return next(new HttpError(400, `There are no user with that criteria.`));
-
-    return res.json({user, token});
-  }).catch(err => next(new HttpError(400)));
-}
-
-function edit(req, res, next) {
-  if(req.params.id != req.app.locals.id){
-    return next(new HttpError(401));
-  }
-
-  const {token} = getRefreshedToken(req);
-
-  User.findById(req.params.id).then(user => {
-    const {email, password, newPassword} = req.body;
-
-    if(password){
-      user.verifyPassword(password).then(match => {
-        if(!match) {
-          return next(new HttpError(400, `Please verify your password`));
-        }
-
-        user.email = email || user.email;
-
-        user.password = newPassword;
-
-        user.save()
-          .then(user => saveUser(user, res))
-          .catch(err => next(new HttpError(500, 'This email address is already taken, please try another')));
-      })
-    }else if(email){
-      user.email = email;
-
-      user.save()
-        .then(user => saveUser(user, res))
-        .catch(err => next(new HttpError(500, 'This email address is already taken, please try another')));
-    }else{
-      return next(new HttpError());
-    }
-  }).catch(err => next(new HttpError(400)));
-}
-
-function destroy(req, res, next) {
-  if(req.params.id != req.app.locals.id && !isAdmin(req)){
-    return next(new HttpError(401));
-  }
-
-  const password = req.body.password;
-
-  if(isAdmin(req)){
-    const {token} = getRefreshedToken(req);
-
-    User.findByIdAndRemove(req.params.id)
-      .then(() => {
-        return res.json({message: 'User successfully deleted.', token});
-      })
-      .catch(() => next(new HttpError(400, `User doesn't exist`)));
-  }else if(password){
-    User.findById(req.params.id).then(user => {
-      user.verifyPassword(password).then(match => {
-        user.remove()
-          .then(() => {
-            return res.json({message: 'User successfully deleted.'});
-          })
-          .catch(err => next(new HttpError()));
-      });
-    });
-  }else{
+  }catch(e){
     return next(new HttpError());
   }
 }
 
+async function show(req, res, next) {
+  const {token} = getRefreshedToken(req);
 
-// Helpers
-function saveUser(user, res){ 
-  return res.json({token: jwt.signToken(user.id, user.role)});
+  try{
+    const user = await User.findById(req.params.id);
+
+    if (!user) return next(new HttpError(400, `There are no user with that criteria.`));
+
+    return res.json({user, token});
+  }catch(err){
+    return next(new HttpError(400));
+  }
 }
 
+async function edit(req, res, next) {
+  if(req.params.id != req.app.locals.id){
+    return next(new HttpError(401));
+  }
+
+  const {email, password, newPassword} = req.body;
+
+  if(!(password || email)) return next(new HttpError(400));
+
+  try{
+    const user = await User.findById(req.params.id);
+    
+    if(password){
+      if(!newPassword) return next(new HttpError(400, `Please provide a new password`));
+
+      const passwordVerified = await user.verifyPassword(password);
+
+      if(!passwordVerified) return next(new HttpError(400, `Please verify your password`));
+
+      user.password = newPassword;
+    }
+
+    user.email = email || user.email;
+
+    const savedUser = await user.save();
+
+    return res.json({token: jwt.signToken(savedUser.id, savedUser.role), message: 'Your profile has been successfully updated'});
+  }catch(err){
+    const {email, password} = err.errors;
+    err = email || password || false;
+
+    return next(new HttpError(400, err.message));
+  }
+}
+
+async function destroy(req, res, next) {
+  if(req.params.id != req.app.locals.id && !isAdmin(req)){
+    return next(new HttpError(401));
+  }
+
+  const {password} = req.body;
+
+  if(!password) return next(new HttpError(400, `Please provide your password`));
+
+  if(isAdmin(req)){
+    const {token} = getRefreshedToken(req);
+
+    try{
+      await User.findByIdAndRemove(req.params.id);
+
+      return res.json({message: 'User successfully deleted.', token});
+    }catch(err){
+      return next(new HttpError(400, `User doesn't exist`));
+    }
+  }
+
+  try{
+    const user = await User.findById(req.params.id);
+    const passwordVerified = await user.verifyPassword(password);
+    
+    if(!passwordVerified) return next(new HttpError(400, `Please verify your password`));
+
+    await user.remove();
+
+    return res.json({message: 'User successfully deleted.'});
+  }catch(err){
+    return next(new HttpError());
+  }
+
+}
+
+
+// Helpers
 function isAdmin(req){
   return req.app.locals.role == 'admin';
 }

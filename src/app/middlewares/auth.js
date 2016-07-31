@@ -1,14 +1,16 @@
 import jwt from '../utils/jwt'
 
-export default function(req, res, next) {
+export default async function(req, res, next) {
   const token = req.body.token || req.query.token || req.headers['x-access-token'];
 
-  jwt.verifyToken(token).then((auth) => {
+  try{
+    const auth = await jwt.verifyToken(token);
+
     req.app.locals.token = auth.token;
     req.app.locals.id = auth.sub;
     req.app.locals.role = auth.role;
     next();
-  }).catch((err) => {
+  }catch(err){
     return next(err);
-  });
+  }
 }

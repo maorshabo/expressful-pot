@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "A simple API boilerplate build with express+mongoDB+JWT written in ES6.",
   "scripts": {
-    "babel-node": "babel-node --presets=es2015 --ignore='foo|bar|baz'",
-    "serve": "nodemon --exec npm run babel-node -- src/app/app.js",
+    "babel-node": "babel-node --presets es2015,stage-3",
+    "serve": "nodemon --exec npm run babel-node src/app/app.js",
     "mkdir:storage-logs": "mkdirp ./dist/storage/logs",
     "build": "npm run mkdir:storage-logs; babel src -d dist",
-    "seed:users": "npm run babel-node -- src/seeds/users.js",
+    "seed:users": "npm run babel-node src/seeds/users.js",
     "start": "NODE_ENV=production node dist/app/app.js"
   },
   "author": "AlgusDark",
@@ -30,6 +30,7 @@
     "babel-core": "^6.10.4",
     "babel-polyfill": "^6.9.1",
     "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-3": "^6.11.0",
     "mkdirp": "^0.5.1",
     "nodemon": "^1.9.2"
   }

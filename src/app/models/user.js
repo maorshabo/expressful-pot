@@ -14,8 +14,17 @@ const UserSchema = new mongoose.Schema({
     'Please fill a valid email address'
     ]
   },
-  role: {type: String, enum: ['user', 'admin'], default: 'user'},
-  password: {type: String, required: [true, 'Password is required.']},
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  password: {
+    type: String,
+    required: [true, 'Password is required.'],
+    trim: true,
+    minlength: 1
+  },
   passwordResetToken: String,
   passwordResetExpires: Date
 });
