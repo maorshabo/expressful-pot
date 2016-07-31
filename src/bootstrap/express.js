@@ -10,7 +10,7 @@ import logger from "../app/utils/logger";
 import routes from "../app/routes";
 import errorHandlingMiddleware from "../app/routes/middlewares/errorHandling";
 
-import config from "./";
+import config from "../config";
 
 const app = express();
 

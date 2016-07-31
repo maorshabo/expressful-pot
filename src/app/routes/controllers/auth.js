@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import config from '../../config';
+import config from '../../../config';
 
-import HttpError from '../utils/HttpError';
-import User from '../models/user';
-import jwt from '../utils/jwt';
-import logger from '../utils/logger';
+import HttpError from '../../utils/HttpError';
+import User from '../../models/user';
+import jwt from '../../utils/jwt';
+import logger from '../../utils/logger';
 
 async function login(req, res, next) {
   if(!req.body.email) return next(new HttpError(500, 'Please provide an email.'));

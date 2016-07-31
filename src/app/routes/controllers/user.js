@@ -1,6 +1,6 @@
-import HttpError from '../utils/HttpError';
-import User from '../models/user';
-import jwt from '../utils/jwt';
+import HttpError from '../../utils/HttpError';
+import User from '../../models/user';
+import jwt from '../../utils/jwt';
 
 async function index(req, res, next) {
   if(!isAdmin(req)) return next(new HttpError(401));
@@ -69,10 +69,6 @@ async function destroy(req, res, next) {
     return next(new HttpError(401));
   }
 
-  const {password} = req.body;
-
-  if(!password) return next(new HttpError(400, `Please provide your password`));
-
   if(isAdmin(req)){
     const {token} = getRefreshedToken(req);
 
@@ -84,6 +80,10 @@ async function destroy(req, res, next) {
       return next(new HttpError(400, `User doesn't exist`));
     }
   }
+
+  const {password} = req.body;
+
+  if(!password) return next(new HttpError(400, `Please provide your password`));
 
   try{
     const user = await User.findById(req.params.id);

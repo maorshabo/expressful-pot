@@ -4,11 +4,11 @@
   "description": "A simple API boilerplate build with express+mongoDB+JWT written in ES6.",
   "scripts": {
     "babel-node": "babel-node --presets es2015,stage-3",
-    "serve": "nodemon --exec npm run babel-node src/app/app.js",
+    "serve": "nodemon --exec npm run babel-node src/bootstrap/app.js",
     "mkdir:storage-logs": "mkdirp ./dist/storage/logs",
     "build": "npm run mkdir:storage-logs; babel src -d dist",
     "seed:users": "npm run babel-node src/seeds/users.js",
-    "start": "NODE_ENV=production node dist/app/app.js"
+    "start": "NODE_ENV=production node dist/bootstrap/app.js"
   },
   "author": "AlgusDark",
   "license": "MIT",

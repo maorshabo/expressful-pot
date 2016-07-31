@@ -1,4 +1,4 @@
-import jwt from '../utils/jwt'
+import jwt from '../../utils/jwt';
 
 export default async function(req, res, next) {
   const token = req.body.token || req.query.token || req.headers['x-access-token'];
